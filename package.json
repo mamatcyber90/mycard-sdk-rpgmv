@@ -1,0 +1,31 @@
+{
+  "name": "@mycard/sdk-rpgmv",
+  "version": "1.0.0",
+  "description": "MyCard Plugin For RPG Maker MV",
+  "license": "LGPL-3.0",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "webpack -p",
+    "build:watch": "webpack -p --watch",
+    "lint": "tslint --fix -p ."
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.74",
+    "@types/node": "^8.0.25",
+    "awesome-typescript-loader": "^3.2.3",
+    "core-js": "^2.5.0",
+    "es6-promisify": "^5.0.0",
+    "lodash": "^4.17.4",
+    "prettier": "^1.5.3",
+    "tslint": "^5.7.0",
+    "tslint-config-prettier": "^1.4.0",
+    "tslint-plugin-prettier": "^1.1.0",
+    "typescript": "^2.4.2",
+    "url-polyfill": "^1.0.7",
+    "webdav": "https://github.com/moecube/webdav-client/releases/download/v1.0.1/webdav-1.0.1.tgz",
+    "webpack": "^3.5.5",
+    "whatwg-fetch": "^2.0.3"
+  }
+}

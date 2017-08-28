@@ -1,0 +1,30 @@
+{
+  "extends": [
+    "tslint:recommended",
+    "tslint-config-prettier"
+  ],
+  "rulesDirectory": [
+    "tslint-plugin-prettier"
+  ],
+  "rules": {
+    "prettier": [
+      true,
+      {
+        "printWidth": 140,
+        "singleQuote": true
+      }
+    ],
+    "only-arrow-functions": false,
+    "no-console": [
+      true,
+      "debug",
+      "info",
+      "time",
+      "timeEnd",
+      "trace"
+    ],
+    "interface-name": false,
+    "radix": false,
+    "variable-name": false
+  }
+}

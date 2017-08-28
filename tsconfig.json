@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "sourceMap": true,
+    "strict": true,
+    "lib": [
+      "esnext",
+      "dom.iterable"
+    ],
+    "suppressImplicitAnyIndexErrors": true,
+    "noImplicitAny": false,
+    "downlevelIteration": true
+  },
+  "compileOnSave": false,
+  "exclude": [
+    "node_modules"
+  ]
+}
