@@ -1,6 +1,7 @@
 /*:zh
  * @plugindesc 萌卡平台支持
  * @author zh99998 <zh99998＠gmail.com>
+ * @preserve
  *
  * @help
  *
@@ -82,7 +83,6 @@
 
 import { MyCard } from './mycard';
 import './polyfills';
-import './rpgmv.d';
 
 MyCard.main().catch(error => {
   console.error(error);

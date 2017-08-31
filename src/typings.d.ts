@@ -8,3 +8,8 @@ declare const $gameSwitches: any;
 declare const ResourceHandler: any;
 declare const Decrypter: any;
 declare const StorageManager: any;
+declare namespace NodeJS {
+  interface Global {
+    require: NodeRequireFunction;
+  }
+}

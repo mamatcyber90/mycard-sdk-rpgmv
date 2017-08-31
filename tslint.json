@@ -25,6 +25,7 @@
     ],
     "interface-name": false,
     "radix": false,
-    "variable-name": false
+    "variable-name": false,
+    "no-namespace": false
   }
 }

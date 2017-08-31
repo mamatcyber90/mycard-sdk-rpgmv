@@ -29,19 +29,6 @@ export class Storage {
     this.remote = createClient(new URL(appId, 'https://api.mycard.moe/storage/').toString(), user.username, user.external_id.toString());
   }
 
-  // readFile(path: string): Promise<Uint8Array> {
-  //     return this.remote.getFileContents(path);
-  // }
-  //
-  // async writeFile(path: string, data: Uint8Array | Buffer | string) {
-  //     await this.remote.putFileContents(path, data);
-  //     return await this.remote.stat(path);
-  // }
-  //
-  // unlink(path: string): Promise<void> {
-  //     return this.remote.deleteFile(path);
-  // }
-
   public async *walkdir(dir = '/'): AsyncIterable<FileStats> {
     const items: Stats[] = await this.remote.getDirectoryContents(dir);
     // console.log('取远端目录', dir, items);
@@ -120,7 +107,7 @@ export class Storage {
     const item: FileStats = await this.remote.stat(remotePath);
     console.log(item);
     const time = new Date(item.lastmod);
-    this.local!.utimes(file, time, time);
+    await this.local!.utimes(file, time, time);
     localStorage.setItem('FILE_' + file, time.toString());
   }
 
@@ -128,7 +115,7 @@ export class Storage {
     const remotePath = path.join('/', file);
     const data = await this.remote!.getFileContents(remotePath);
     await this.local!.writeFile(file, data);
-    this.local!.utimes(file, time, time);
+    await this.local!.utimes(file, time, time);
     localStorage.setItem('FILE_' + file, time.toString());
   }
 

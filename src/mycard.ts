@@ -215,11 +215,11 @@ export class MyCard {
   }
 
   private static handleLogin(token = this.getTokenFromEnv() || this.getTokenFromUrl()): User | undefined {
-    // if (token) {
-    //     localStorage.setItem('sso', token);
-    // } else {
-    //     token = localStorage.getItem('sso');
-    // }
+    if (token) {
+      localStorage.setItem('sso', token);
+    } else if (!navigator.onLine) {
+      token = localStorage.getItem('sso');
+    }
     if (!token) {
       return;
     }
