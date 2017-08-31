@@ -85,20 +85,19 @@ export class MyCard {
     this.appId = parameters.accessKey;
 
     if (StorageManager.isLocalMode()) {
+      const { Window, App } = require('nw.gui');
+      App.addOriginAccessWhitelistEntry('https://accounts.moecube.com', 'file', '', true);
+      App.addOriginAccessWhitelistEntry('https://api.moecube.com', 'file', '', true);
       if (JSON.parse(parameters.showDevTools)) {
-        const { Window } = require('nw.gui');
         Window.get().showDevTools();
       }
       if (JSON.parse(parameters.overrideLocalFilePath)) {
-        const localFilePath = path.join(path.dirname(global.process.execPath), 'www');
+        const localFilePath = path.join(path.dirname(process.execPath), 'www');
         if (!fs.existsSync(localFilePath)) {
           fs.mkdirSync(localFilePath);
         }
-        global.process.mainModule!.filename = path.join(localFilePath, 'index.html');
+        process.mainModule!.filename = path.join(localFilePath, 'index.html');
       }
-      const { App } = require('nw.gui');
-      App.addOriginAccessWhitelistEntry('https://accounts.moecube.com', 'file', '', true);
-      App.addOriginAccessWhitelistEntry('https://api.moecube.com', 'file', '', true);
     }
 
     this.handleLogin();
@@ -228,7 +227,7 @@ export class MyCard {
   }
 
   private static getTokenFromEnv(): string | undefined {
-    return global.process && global.process.env && global.process.env.MyCardSSO;
+    return process.env.MyCardSSO;
   }
 
   private static getTokenFromUrl(): string | undefined | null {
