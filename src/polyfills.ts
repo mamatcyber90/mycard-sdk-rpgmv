@@ -7,3 +7,4 @@ if (StorageManager.isLocalMode()) {
   Object.assign(require('crypto'), global.require('crypto'));
   Object.assign(process, global.process);
 }
+require('util').promisify = require('es6-promisify').promisify;

@@ -1,6 +1,6 @@
-import { promisify } from 'es6-promisify';
 import * as fs from 'fs';
 import * as path from 'path';
+import { promisify } from 'util';
 import { LocalFileSystem, SimpleStats } from './storage';
 
 export class RPGMVFileStorage implements LocalFileSystem {
