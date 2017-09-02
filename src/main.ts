@@ -84,6 +84,4 @@
 import { MyCard } from './mycard';
 import './polyfills';
 
-MyCard.main().catch(error => {
-  console.error(error);
-});
+MyCard.main();

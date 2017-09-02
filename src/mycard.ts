@@ -15,13 +15,13 @@ export class MyCard {
   // 登录
   public static login() {
     if (!this.user) {
-      return (location.href = this.loginUrl());
+      location.href = this.loginUrl();
     }
   }
 
   // 退出登录
   public static logout() {
-    return (location.href = this.logoutUrl());
+    location.href = this.logoutUrl();
   }
 
   // 将是否登录过存为开关
@@ -80,7 +80,7 @@ export class MyCard {
     $dataActors[id].name = this.user.name;
   }
 
-  public static async main() {
+  public static main() {
     const parameters = PluginManager.parameters('MyCard');
     this.appId = parameters.accessKey;
 
@@ -106,63 +106,63 @@ export class MyCard {
       this.login();
     }
 
+    if (JSON.parse(parameters.precache) && 'serviceWorker' in navigator && location.protocol === 'https:') {
+      navigator.serviceWorker.register('service-worker.js').catch(error => console.log(error));
+    }
+
+    // register Plugin Command
+    Game_Interpreter.prototype.pluginCommand = new Proxy(Game_Interpreter.prototype.pluginCommand, {
+      apply: (target, thisArgument, argumentsList) => {
+        Reflect.apply(target, thisArgument, argumentsList);
+        const [command, args] = argumentsList;
+        if (command === 'MyCard') {
+          const [method, ...params] = args;
+          MyCard[method](...params);
+        }
+      }
+    });
+
     // 如果没登录，后面的自动处理就都不需要做了
     if (!this.user) {
       return;
     }
 
-    if (JSON.parse(parameters.precache) && 'serviceWorker' in navigator && location.protocol === 'https:') {
-      try {
-        await navigator.serviceWorker.register('service-worker.js');
-      } catch (error) {
-        console.error(error);
-      }
-    }
-
-    // register Plugin Command
-    const _Game_Interpreter_pluginCommand = Game_Interpreter.prototype.pluginCommand;
-    Game_Interpreter.prototype.pluginCommand = function(command: string, args: any[]) {
-      _Game_Interpreter_pluginCommand.call(this, command, args);
-      if (command === 'MyCard') {
-        console.log(args);
-        const [method, ...params] = args;
-        MyCard[method](...params);
-      }
-    };
-
     const usernameVariableId = parseInt(parameters.setUsernameToVariable);
     const nameVariableId = parseInt(parameters.setameToVariable);
     const switchId = parseInt(parameters.setLoginToSwitch);
     if (usernameVariableId || nameVariableId || switchId) {
-      const _DataManager_createGameObjects = DataManager.createGameObjects;
-      DataManager.createGameObjects = () => {
-        _DataManager_createGameObjects();
-        if (usernameVariableId) {
-          this.setUsernameToVariable(usernameVariableId);
+      DataManager.createGameObjects = new Proxy(DataManager.createGameObjects, {
+        apply: (target, thisArgument, argumentsList) => {
+          Reflect.apply(target, thisArgument, argumentsList);
+          if (usernameVariableId) {
+            this.setUsernameToVariable(usernameVariableId);
+          }
+          if (nameVariableId) {
+            this.setNameToVariable(usernameVariableId);
+            $gameVariables.setValue(nameVariableId, this.user.name);
+          }
+          if (switchId) {
+            this.setLoginToSwitch(switchId);
+          }
         }
-        if (nameVariableId) {
-          this.setNameToVariable(usernameVariableId);
-          $gameVariables.setValue(nameVariableId, this.user.name);
-        }
-        if (switchId) {
-          this.setLoginToSwitch(switchId);
-        }
-      };
+      });
     }
 
     const usernameActorId = parseInt(parameters.setUsernameToActor);
     const nameActorId = parseInt(parameters.setNameToActor);
     if (usernameActorId || nameActorId) {
-      const _DataManager_onLoad = DataManager.onLoad;
-      DataManager.onLoad = (object: any) => {
-        if (object === $dataActors) {
-          if (usernameActorId || nameVariableId) {
-            this.setUsernameToActor(usernameActorId);
-            this.setNameToActor(nameActorId);
+      DataManager.onLoad = new Proxy(DataManager.onLoad, {
+        apply: (target, thisArgument, argumentsList) => {
+          const [object] = argumentsList;
+          if (object === $dataActors) {
+            if (usernameActorId || nameVariableId) {
+              this.setUsernameToActor(usernameActorId);
+              this.setNameToActor(nameActorId);
+            }
           }
+          Reflect.apply(target, thisArgument, argumentsList);
         }
-        _DataManager_onLoad.bind(DataManager, object);
-      };
+      });
     }
 
     const image = parameters.setAvatarToImage;
@@ -172,18 +172,31 @@ export class MyCard {
 
     if (JSON.parse(parameters.storage)) {
       const storage = new Storage(this.appId, this.user, StorageManager.isLocalMode() ? new RPGMVFileStorage() : new RPGMVWebStorage());
+      StorageManager.save = new Proxy(StorageManager.save, {
+        apply: (target, thisArgument, argumentsList) => {
+          Reflect.apply(target, thisArgument, argumentsList);
+          const [savefileId] = argumentsList;
+          storage.upload(path.relative(StorageManager.localFileDirectoryPath(), StorageManager.localFilePath(savefileId))).catch(error => {
+            console.error(error);
+          });
+        }
+      });
 
-      const _StorageManager_save = StorageManager.save.bind(StorageManager);
-      StorageManager.save = function(savefileId: number, json: any) {
-        _StorageManager_save(savefileId, json);
-        storage.sync();
-      };
+      Scene_Title.prototype.isReady = new Proxy(Scene_Title.prototype.isReady, {
+        apply: (target, thisArgument, argumentsList) => {
+          return !storage.working && Reflect.apply(target, thisArgument, argumentsList);
+        }
+      });
 
-      try {
-        await storage.sync();
-      } catch (error) {
-        console.error(error);
-      }
+      storage
+        .sync()
+        .then(() => {
+          ConfigManager.load();
+          DataManager.selectSavefileForNewGame();
+        })
+        .catch(error => {
+          console.error(error);
+        });
     }
   }
 

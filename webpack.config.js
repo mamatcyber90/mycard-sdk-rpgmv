@@ -3,6 +3,7 @@ module.exports = {
   output: {
     filename: 'MyCard.js',
     path: __dirname + '/dist'
+    // path: '/Users/zh99998/Documents/Games/Project4/js/plugins'
   },
   resolve: {
     extensions: ['.ts', '.js', '.json']

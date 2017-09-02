@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "webpack -p",
-    "build:watch": "webpack -p --watch",
+    "build:watch": "webpack --watch",
     "lint": "tslint --fix -p ."
   },
   "devDependencies": {
@@ -27,5 +27,8 @@
     "webdav": "https://github.com/moecube/webdav-client/releases/download/v1.0.1/webdav-1.0.1.tgz",
     "webpack": "^3.5.5",
     "whatwg-fetch": "^2.0.3"
+  },
+  "dependencies": {
+    "proxy-polyfill": "^0.1.7"
   }
 }

@@ -23,10 +23,15 @@ export type Stats = DirectoryStats | FileStats;
 
 export class Storage {
   public working: boolean;
+  public processed = new Map<string, boolean>();
   private remote;
 
   constructor(appId: string, user: User, private local?: LocalFileSystem) {
     this.remote = createClient(new URL(appId, 'https://api.mycard.moe/storage/').toString(), user.username, user.external_id.toString());
+  }
+
+  public getRemoteFileName(item: Stats) {
+    return path.relative('/', item.filename);
   }
 
   public async *walkdir(dir = '/'): AsyncIterable<FileStats> {
@@ -42,59 +47,66 @@ export class Storage {
   }
 
   public async sync() {
+    console.log('sync');
     if (!this.local) {
       throw new Error('no local');
     }
+    if (this.working) {
+      return;
+    }
+    try {
+      this.working = true;
+      for await (const item of this.walkdir()) {
+        const file = this.getRemoteFileName(item);
+        console.log('remote', file);
+        const remoteTime = new Date(item.lastmod);
+        const stat = await this.local.stat(file);
+        if (stat) {
+          const localTime = stat.mtime;
+          // 远端有，本地有
 
-    const processed = new Map<string, boolean>();
-
-    for await (const item of this.walkdir()) {
-      const file = path.relative('/', item.filename);
-      console.log('remote', file, item.filename);
-      processed.set(file, true);
-      const remoteTime = new Date(item.lastmod);
-      const stat = await this.local.stat(file);
-      if (stat) {
-        const localTime = stat.mtime;
-        // 远端有，本地有
-
-        if (remoteTime > localTime) {
-          // 远端有，本地有，远端>本地，下载
-          await this.download(file, remoteTime);
-        } else if (remoteTime < localTime) {
-          // 远端有，本地有，远端<本地，上传
-          await this.upload(file);
+          if (remoteTime > localTime) {
+            // 远端有，本地有，远端>本地，下载
+            await this.download(file, remoteTime);
+          } else if (remoteTime < localTime) {
+            // 远端有，本地有，远端<本地，上传
+            await this.upload(file);
+          } else {
+            // 远端有，本地有，远端=本地，更新记录
+            const time = localTime.toString();
+            if (localStorage.getItem('FILE_' + file) !== time) {
+              localStorage.setItem('FILE_' + file, time);
+            }
+          }
         } else {
-          // 远端有，本地有，远端=本地，更新记录
-          const time = localTime.toString();
-          if (localStorage.getItem('FILE_' + file) !== time) {
-            localStorage.setItem('FILE_' + file, time);
+          // 远端有，本地无
+          if (localStorage.getItem('FILE_' + file)) {
+            // 远端有，本地无，记录有，删除远端
+            await this.removeRemote(file);
+          } else {
+            // 远端有，本地无，记录无，下载
+            await this.download(file, remoteTime);
           }
         }
-      } else {
-        // 远端有，本地无
-        if (localStorage.getItem('FILE_' + file)) {
-          // 远端有，本地无，记录有，删除远端
-          await this.removeRemote(file);
-        } else {
-          // 远端有，本地无，记录无，下载
-          await this.download(file, remoteTime);
-        }
+        this.processed.set(file, true);
       }
-    }
 
-    for (const file of await this.local.readdir('/')) {
-      console.log('local', file);
-      if (!processed.has(file)) {
-        // 远端无，本地有
-        if (localStorage.getItem(file)) {
-          // 远端无，本地有，记录有，删除本地
-          await this.local.unlink(file);
-        } else {
-          // 远端无，本地有，记录无，上传
-          await this.upload(file);
+      for (const file of await this.local.readdir('/')) {
+        console.log('local', file);
+        if (!this.processed.has(file)) {
+          // 远端无，本地有
+          if (localStorage.getItem('FILE_' + file)) {
+            // 远端无，本地有，记录有，删除本地
+            await this.removeLocal(file);
+          } else {
+            // 远端无，本地有，记录无，上传
+            await this.upload(file);
+          }
+          this.processed.set(file, true);
         }
       }
+    } finally {
+      this.working = false;
     }
   }
 
@@ -109,6 +121,7 @@ export class Storage {
   }
 
   public async download(file: string, time: Date) {
+    console.log('download', file);
     const data = await this.remote!.getFileContents(file);
     await this.local!.writeFile(file, data);
     await this.local!.utimes(file, time, time);
@@ -116,11 +129,13 @@ export class Storage {
   }
 
   public async removeLocal(file: string) {
+    console.log('remove local', file);
     await this.local!.unlink(file);
     localStorage.removeItem('FILE_' + file);
   }
 
   public async removeRemote(file: string) {
+    console.log('remove remote', file);
     await this.remote.deleteFile(file);
     localStorage.removeItem('FILE_' + file);
   }

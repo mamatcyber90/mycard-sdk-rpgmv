@@ -7,6 +7,7 @@ export class User {
     return Object.assign(new User(), fromPairs(Array.from(new URLSearchParams(Buffer.from(token, 'base64').toString()))));
   }
 
+  /* tslint:disable:variable-name */
   public admin: boolean;
   public avatar_url: string;
   public email: string;
@@ -14,6 +15,7 @@ export class User {
   public moderator: boolean;
   public name: string;
   public username: string;
+  /* tslint:enable:variable-name */
 
   // async getKeys() {
   //     const url = new URL('https://api.moecube.com/pay/keys');
