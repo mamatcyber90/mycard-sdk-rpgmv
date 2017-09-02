@@ -50,7 +50,7 @@ export class Storage {
 
     for await (const item of this.walkdir()) {
       const file = path.relative('/', item.filename);
-      console.log('remote', file);
+      console.log('remote', file, item.filename);
       processed.set(file, true);
       const remoteTime = new Date(item.lastmod);
       const stat = await this.local.stat(file);
@@ -99,21 +99,17 @@ export class Storage {
   }
 
   public async upload(file: string) {
-    const remotePath = path.join('/', file);
     console.log('upload', file);
     const data = await this.local!.readFile(file);
-    await this.remote.putFileContents(remotePath, data);
-    console.log(remotePath);
-    const item: FileStats = await this.remote.stat(remotePath);
-    console.log(item);
+    await this.remote.putFileContents(file, data);
+    const item: FileStats = await this.remote.stat(file);
     const time = new Date(item.lastmod);
     await this.local!.utimes(file, time, time);
     localStorage.setItem('FILE_' + file, time.toString());
   }
 
   public async download(file: string, time: Date) {
-    const remotePath = path.join('/', file);
-    const data = await this.remote!.getFileContents(remotePath);
+    const data = await this.remote!.getFileContents(file);
     await this.local!.writeFile(file, data);
     await this.local!.utimes(file, time, time);
     localStorage.setItem('FILE_' + file, time.toString());

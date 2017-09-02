@@ -13,3 +13,7 @@ declare namespace NodeJS {
     require: NodeRequireFunction;
   }
 }
+
+interface ObjectConstructor {
+  getOwnPropertyDescriptors(o: any): PropertyDescriptorMap;
+}
