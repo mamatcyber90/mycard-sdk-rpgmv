@@ -3,20 +3,20 @@ import * as createClient from 'webdav';
 import { User } from './user';
 
 export interface DirectoryStats {
-  'filename': string;
-  'basename': string;
-  'lastmod': string;
-  'size': 0;
-  'type': 'directory';
+  filename: string;
+  basename: string;
+  lastmod: string;
+  size: 0;
+  type: 'directory';
 }
 
 export interface FileStats {
-  'filename': string;
-  'basename': string;
-  'lastmod': string;
-  'size': number;
-  'type': 'file';
-  'mime': string;
+  filename: string;
+  basename: string;
+  lastmod: string;
+  size: number;
+  type: 'file';
+  mime: string;
 }
 
 export type Stats = DirectoryStats | FileStats;

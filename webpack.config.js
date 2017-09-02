@@ -6,7 +6,10 @@ module.exports = {
     // path: '/Users/zh99998/Documents/Games/Project4/js/plugins'
   },
   resolve: {
-    extensions: ['.ts', '.js', '.json']
+    extensions: ['.ts', '.js', '.json'],
+    alias: {
+      'proxy-polyfill': 'proxy-polyfill/proxy.min.js'
+    }
   },
   module: {
     rules: [

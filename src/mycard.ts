@@ -208,7 +208,13 @@ export class MyCard {
     const url = new URL('https://accounts.moecube.com');
     params = url.searchParams;
     params.set('sso', payload);
-    params.set('sig', crypto.createHmac('sha256', 'zsZv6LXHDwwtUAGa').update(payload).digest('hex'));
+    params.set(
+      'sig',
+      crypto
+        .createHmac('sha256', 'zsZv6LXHDwwtUAGa')
+        .update(payload)
+        .digest('hex')
+    );
     return url.toString();
   }
 
