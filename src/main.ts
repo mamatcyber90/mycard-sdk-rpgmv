@@ -73,12 +73,6 @@
  * Default: 不启用
  * @default false
  *
- * @param overrideLocalFilePath
- * @desc 如果要把游戏放到服务器上在线加载，同时又想让 PC 版能存档到本地 save 目录，就开启这个，只对 PC 版有效。
- * 不启用 - false     启用 - true
- * Default: 不启用
- * @default false
- *
  */
 
 import { MyCard } from './mycard';

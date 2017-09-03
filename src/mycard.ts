@@ -91,8 +91,8 @@ export class MyCard {
       if (JSON.parse(parameters.showDevTools)) {
         Window.get().showDevTools();
       }
-      if (JSON.parse(parameters.overrideLocalFilePath)) {
-        const localFilePath = path.join(path.dirname(process.execPath), 'www');
+      if (location.protocol !== 'file:') {
+        const localFilePath = path.join(process.cwd(), 'www');
         if (!fs.existsSync(localFilePath)) {
           fs.mkdirSync(localFilePath);
         }
@@ -139,7 +139,6 @@ export class MyCard {
           }
           if (nameVariableId) {
             this.setNameToVariable(usernameVariableId);
-            $gameVariables.setValue(nameVariableId, this.user.name);
           }
           if (switchId) {
             this.setLoginToSwitch(switchId);
@@ -155,8 +154,10 @@ export class MyCard {
         apply: (target, thisArgument, argumentsList) => {
           const [object] = argumentsList;
           if (object === $dataActors) {
-            if (usernameActorId || nameVariableId) {
+            if (usernameActorId) {
               this.setUsernameToActor(usernameActorId);
+            }
+            if (nameVariableId) {
               this.setNameToActor(nameActorId);
             }
           }

@@ -45,10 +45,14 @@ export class RPGMVWebStorage implements LocalFileSystem {
   }
 
   public async stat(file: string): Promise<SimpleStats> {
-    const t = localStorage.getItem(file);
-    return {
-      mtime: t ? new Date(t) : new Date(0)
-    };
+    if (localStorage.getItem(StorageManager.webStorageKey(this.savefileIdFromLocalFilePath(file)))) {
+      const t = localStorage.getItem(file);
+      return {
+        mtime: t ? new Date(t) : new Date(0)
+      };
+    } else {
+      throw new Error('not exists');
+    }
   }
 
   public async unlink(file: string): Promise<any> {

@@ -60,8 +60,8 @@ export class Storage {
         const file = this.getRemoteFileName(item);
         console.log('remote', file);
         const remoteTime = new Date(item.lastmod);
-        const stat = await this.local.stat(file);
-        if (stat) {
+        try {
+          const stat = await this.local.stat(file);
           const localTime = stat.mtime;
           // 远端有，本地有
 
@@ -78,7 +78,7 @@ export class Storage {
               localStorage.setItem('FILE_' + file, time);
             }
           }
-        } else {
+        } catch (error) {
           // 远端有，本地无
           if (localStorage.getItem('FILE_' + file)) {
             // 远端有，本地无，记录有，删除远端
@@ -150,7 +150,7 @@ export interface LocalFileSystem {
 
   writeFile(file: string, data: Uint8Array): Promise<void>;
 
-  stat(file: string): Promise<SimpleStats | undefined>;
+  stat(file: string): Promise<SimpleStats>;
 
   utimes(file: string, atime: Date, mtime: Date): Promise<void>;
 

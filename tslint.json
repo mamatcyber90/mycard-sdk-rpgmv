@@ -26,7 +26,6 @@
     "interface-name": false,
     "radix": false,
     "no-namespace": false,
-    "no-var-requires": false,
-    "no-debugger": false
+    "no-var-requires": false
   }
 }
