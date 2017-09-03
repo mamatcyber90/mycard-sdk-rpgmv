@@ -1,3 +1,4 @@
+import { MyCard } from './mycard';
 import { LocalFileSystem, SimpleStats } from './storage';
 
 export class RPGMVWebStorage implements LocalFileSystem {
@@ -68,7 +69,7 @@ export class RPGMVWebStorage implements LocalFileSystem {
     const result: string[] = [];
     for (let i = -1; i <= DataManager.maxSavefiles(); i++) {
       if (StorageManager.exists(i)) {
-        result.push(StorageManager.localFilePath(i));
+        result.push(MyCard.localFilePath(i));
       }
     }
     return result;

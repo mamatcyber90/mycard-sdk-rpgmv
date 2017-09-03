@@ -9,6 +9,9 @@ export class RPGMVFileStorage implements LocalFileSystem {
   }
 
   public writeFile(file: string, data: Uint8Array): Promise<void> {
+    if (!fs.existsSync(StorageManager.localFileDirectoryPath())) {
+      fs.mkdirSync(StorageManager.localFileDirectoryPath());
+    }
     return promisify(fs.writeFile)(path.join(StorageManager.localFileDirectoryPath(), file), data);
   }
 

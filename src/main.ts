@@ -77,5 +77,6 @@
 
 import { MyCard } from './mycard';
 import './polyfills';
+(window as any).MyCard = MyCard;
 
 MyCard.main();

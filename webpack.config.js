@@ -17,7 +17,7 @@ module.exports = {
     ]
   },
   node: {
-    fs: 'empty',
+    fs: 'empty'
   },
   externals: {
     'nw.gui': 'commonjs nw.gui'

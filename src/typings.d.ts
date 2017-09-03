@@ -10,6 +10,7 @@ declare const Decrypter: any;
 declare const StorageManager: any;
 declare const Scene_Title: any;
 declare const ConfigManager: any;
+declare const SceneManager: any;
 declare namespace NodeJS {
   interface Global {
     require: NodeRequireFunction;
@@ -18,4 +19,8 @@ declare namespace NodeJS {
 
 interface ObjectConstructor {
   getOwnPropertyDescriptors(o: any): PropertyDescriptorMap;
+}
+
+interface String {
+  format(...args): string;
 }

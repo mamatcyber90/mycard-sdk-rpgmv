@@ -11,6 +11,7 @@ import { User } from './user';
 export class MyCard {
   public static appId: string;
   public static user: User;
+  public static storage: Storage;
 
   // 登录
   public static login() {
@@ -21,7 +22,19 @@ export class MyCard {
 
   // 退出登录
   public static logout() {
-    location.href = this.logoutUrl();
+    SceneManager.push(Scene_Title); // 为了能显示 Now Loading
+    this.storage.sync().then(
+      () => {
+        localStorage.removeItem('sso');
+        location.href = this.logoutUrl();
+        this.storage.working = true; // 为了能继续 Now Loading
+      },
+      error => {
+        console.error(error);
+        alert('同步存档失败');
+        SceneManager.pop();
+      }
+    );
   }
 
   // 将是否登录过存为开关
@@ -92,12 +105,17 @@ export class MyCard {
         Window.get().showDevTools();
       }
       if (location.protocol !== 'file:') {
-        const localFilePath = path.join(process.cwd(), 'www');
+        const localFilePath = path.join(process.platform === 'win32' ? path.dirname(process.execPath) : process.cwd(), 'www');
         if (!fs.existsSync(localFilePath)) {
           fs.mkdirSync(localFilePath);
         }
         process.mainModule!.filename = path.join(localFilePath, 'index.html');
       }
+    }
+    console.log(location.href)
+    // debugger;
+    if(1===1){
+      return
     }
 
     this.handleLogin();
@@ -172,12 +190,12 @@ export class MyCard {
     }
 
     if (JSON.parse(parameters.storage)) {
-      const storage = new Storage(this.appId, this.user, StorageManager.isLocalMode() ? new RPGMVFileStorage() : new RPGMVWebStorage());
+      this.storage = new Storage(this.appId, this.user, StorageManager.isLocalMode() ? new RPGMVFileStorage() : new RPGMVWebStorage());
       StorageManager.save = new Proxy(StorageManager.save, {
         apply: (target, thisArgument, argumentsList) => {
           Reflect.apply(target, thisArgument, argumentsList);
           const [savefileId] = argumentsList;
-          storage.upload(path.relative(StorageManager.localFileDirectoryPath(), StorageManager.localFilePath(savefileId))).catch(error => {
+          this.storage.upload(this.localFilePath(savefileId)).catch(error => {
             console.error(error);
           });
         }
@@ -185,15 +203,16 @@ export class MyCard {
 
       Scene_Title.prototype.isReady = new Proxy(Scene_Title.prototype.isReady, {
         apply: (target, thisArgument, argumentsList) => {
-          return !storage.working && Reflect.apply(target, thisArgument, argumentsList);
+          return !this.storage.working && Reflect.apply(target, thisArgument, argumentsList);
         }
       });
 
-      storage
+      this.storage
         .sync()
         .then(() => {
           ConfigManager.load();
           DataManager.selectSavefileForNewGame();
+          SceneManager._scene._commandWindow.refresh();
         })
         .catch(error => {
           console.error(error);
@@ -201,6 +220,15 @@ export class MyCard {
     }
   }
 
+  public static localFilePath(savefileId: number) {
+    if (savefileId < 0) {
+      return 'config.rpgsave';
+    } else if (savefileId === 0) {
+      return 'global.rpgsave';
+    } else {
+      return 'file%1.rpgsave'.format(savefileId);
+    }
+  }
   private static loginUrl(): string {
     let params = new URLSearchParams();
     params.set('return_sso_url', this.jwtUrl());
@@ -243,7 +271,10 @@ export class MyCard {
       return;
     }
     this.user = User.fromSSO(token);
-    history.replaceState({}, 'page 2', location.pathname);
+    const url = new URL(location.href);
+    url.searchParams.delete('sso');
+    url.searchParams.delete('jwt');
+    history.replaceState({}, 'page 2', url.toString());
   }
 
   private static getTokenFromEnv(): string | undefined {
