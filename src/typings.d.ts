@@ -8,8 +8,7 @@ declare const $gameSwitches: any;
 declare const ResourceHandler: any;
 declare const Decrypter: any;
 declare const StorageManager: any;
-declare const Scene_Title: any;
-declare const ConfigManager: any;
+declare const Scene_Boot: any;
 declare const SceneManager: any;
 declare namespace NodeJS {
   interface Global {

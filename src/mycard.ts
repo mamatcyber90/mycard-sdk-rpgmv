@@ -22,7 +22,7 @@ export class MyCard {
 
   // 退出登录
   public static logout() {
-    SceneManager.push(Scene_Title); // 为了能显示 Now Loading
+    SceneManager.push(Scene_Boot); // 为了能显示 Now Loading
     this.storage.sync().then(
       () => {
         localStorage.removeItem('sso');
@@ -112,11 +112,6 @@ export class MyCard {
         process.mainModule!.filename = path.join(localFilePath, 'index.html');
       }
     }
-    console.log(location.href)
-    // debugger;
-    if(1===1){
-      return
-    }
 
     this.handleLogin();
 
@@ -201,22 +196,15 @@ export class MyCard {
         }
       });
 
-      Scene_Title.prototype.isReady = new Proxy(Scene_Title.prototype.isReady, {
+      Scene_Boot.prototype.isReady = new Proxy(Scene_Boot.prototype.isReady, {
         apply: (target, thisArgument, argumentsList) => {
           return !this.storage.working && Reflect.apply(target, thisArgument, argumentsList);
         }
       });
 
-      this.storage
-        .sync()
-        .then(() => {
-          ConfigManager.load();
-          DataManager.selectSavefileForNewGame();
-          SceneManager._scene._commandWindow.refresh();
-        })
-        .catch(error => {
-          console.error(error);
-        });
+      this.storage.sync().catch(error => {
+        console.error(error);
+      });
     }
   }
 
